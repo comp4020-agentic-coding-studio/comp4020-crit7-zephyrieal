@@ -1,8 +1,12 @@
 ---
-import { listMessages } from "../lib/db";
+import { listBookings, listVenues, venueById } from "../lib/db";
 import "../styles.css";
 
-const messages = listMessages();
+const bookings = listBookings();
+const venues = listVenues();
+const buildings = [...new Set(venues.map((venue) => venue.building))];
+
+const ADVANCEABLE = new Set(["tentatively_assigned", "foc_pending", "foc_approved"]);
 ---
 
 <!doctype html>
@@ -10,44 +14,60 @@ const messages = listMessages();
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>COMP4020 prototype</title>
+    <title>Book a venue</title>
   </head>
   <body>
     <nav aria-label="site">
-      <a href="/">Guestbook</a>
+      <a href="/">Bookings</a>
       <a href="/readme/">About</a>
     </nav>
     <main>
-      <h1>Guestbook</h1>
+      <h1>Book a venue</h1>
       <p>
-        A minimal full-stack starter: messages live in SQLite on the machine's
-        volume (state survives a reload and a redeploy), and new messages
-        appear in every open tab over a server-sent-events stream — open this
-        page twice and sign it in one. Replace all of this with your own
-        prototype.
+        Submit an event and headcount and get told, instantly, which room fits
+        and which team owns it — no emailing five different venue-hire teams
+        to find out.
       </p>
-      <form method="post" action="/api/messages">
-        <label for="body">Leave a message</label>
-        <input id="body" name="body" required maxlength="500" />
-        <button>Sign</button>
+      <form method="post" action="/api/bookings">
+        <label for="event">Event name</label>
+        <input id="event" name="event" required />
+        <label for="headcount">Headcount</label>
+        <input id="headcount" name="headcount" type="number" min="1" required />
+        <label for="building">Preferred building</label>
+        <input id="building" name="building" list="buildings" placeholder="Any building" />
+        <datalist id="buildings">
+          {buildings.map((building) => <option value={building} />)}
+        </datalist>
+        <button>Request a venue</button>
       </form>
-      <ul id="messages">
-        {messages.map((message) => <li>{message.body}</li>)}
+
+      <ul id="bookings">
+        {bookings.map((booking) => {
+          const venue = venueById(booking.venueId);
+          return (
+            <li data-booking-id={booking.id} data-status={booking.status}>
+              <strong>{booking.event}</strong> — {booking.headcount} people
+              <p>Status: {booking.status}</p>
+              {venue ? (
+                <p>
+                  Assigned: {venue.name} ({venue.building}) — owned by{" "}
+                  {venue.owningTeam}, <a href={`mailto:${venue.contactEmail}`}>{venue.contactEmail}</a>
+                </p>
+              ) : (
+                <p>
+                  No venue fits this headcount
+                  {booking.preferredBuilding ? ` in ${booking.preferredBuilding}` : ""}.
+                </p>
+              )}
+              {ADVANCEABLE.has(booking.status) && (
+                <form method="post" action={`/api/bookings/${booking.id}/advance`}>
+                  <button>Advance to next step</button>
+                </form>
+              )}
+            </li>
+          );
+        })}
       </ul>
     </main>
-    <script>
-      // The live half of the demo: subscribe to the SSE stream and prepend
-      // messages as they arrive. The form itself needs none of this — its
-      // POST + redirect re-renders the submitting tab from SQLite; this
-      // stream is how every other tab finds out.
-      const list = document.querySelector("#messages");
-      const source = new EventSource("/api/events");
-      source.addEventListener("message", (event) => {
-        const message = JSON.parse(event.data);
-        const item = document.createElement("li");
-        item.textContent = message.body;
-        list?.prepend(item);
-      });
-    </script>
   </body>
 </html>
