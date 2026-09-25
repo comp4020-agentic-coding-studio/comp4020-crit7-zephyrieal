@@ -7,12 +7,38 @@ import { int, sqliteTable, text } from "drizzle-orm/sqlite-core";
 // boots (see src/lib/db.ts), locally and deployed. Never edit the database
 // by hand: state on the deployed volume outlives every deploy, and the
 // migration trail is what keeps old state and new code compatible.
-export const messages = sqliteTable("messages", {
+export const venues = sqliteTable("venues", {
   id: int().primaryKey({ autoIncrement: true }),
-  body: text().notNull(),
+  name: text().notNull(),
+  building: text().notNull(),
+  capacity: int().notNull(),
+  owningTeam: text("owning_team").notNull(),
+  contactEmail: text("contact_email").notNull(),
+});
+
+export type Venue = typeof venues.$inferSelect;
+
+// The approval workflow a request moves through once a venue is tentatively
+// assigned. "no_venue_available" sits outside this sequence — nothing to
+// advance if no room ever fit.
+export const BOOKING_STATUSES = [
+  "tentatively_assigned",
+  "foc_pending",
+  "foc_approved",
+  "confirmed",
+] as const;
+export type BookingStatus = (typeof BOOKING_STATUSES)[number] | "no_venue_available";
+
+export const bookingRequests = sqliteTable("booking_requests", {
+  id: int().primaryKey({ autoIncrement: true }),
+  event: text().notNull(),
+  headcount: int().notNull(),
+  preferredBuilding: text("preferred_building"),
+  venueId: int("venue_id").references(() => venues.id),
+  status: text().notNull(),
   createdAt: text("created_at")
     .notNull()
     .default(sql`(datetime('now'))`),
 });
 
-export type Message = typeof messages.$inferSelect;
+export type BookingRequest = typeof bookingRequests.$inferSelect;
