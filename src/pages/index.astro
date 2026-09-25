@@ -1,73 +1,140 @@
 ---
+import Layout from "../layouts/Layout.astro";
 import { listBookings, listVenues, venueById } from "../lib/db";
-import "../styles.css";
 
 const bookings = listBookings();
 const venues = listVenues();
 const buildings = [...new Set(venues.map((venue) => venue.building))];
 
-const ADVANCEABLE = new Set(["tentatively_assigned", "foc_pending", "foc_approved"]);
+const STATUS_LABEL: Record<string, string> = {
+  tentatively_assigned: "Room held (tentative)",
+  foc_pending: "Awaiting FOC approval",
+  foc_approved: "FOC approved",
+  confirmed: "Confirmed",
+  no_venue_available: "No room available",
+};
+
+const NEXT_ACTION: Record<string, string> = {
+  tentatively_assigned: "Submit FOC form",
+  foc_pending: "Mark FOC approved",
+  foc_approved: "Confirm booking",
+};
+
+const STAMP_CLASS: Record<string, string> = {
+  tentatively_assigned: "stamp stamp--amber",
+  foc_pending: "stamp stamp--plum",
+  foc_approved: "stamp stamp--blue",
+  confirmed: "stamp stamp--confirmed",
+  no_venue_available: "stamp stamp--flagged",
+};
 ---
 
-<!doctype html>
-<html lang="en-AU">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Book a venue</title>
-  </head>
-  <body>
-    <nav aria-label="site">
-      <a href="/">Bookings</a>
-      <a href="/readme/">About</a>
-    </nav>
-    <main>
-      <h1>Book a venue</h1>
-      <p>
-        Submit an event and headcount and get told, instantly, which room fits
-        and which team owns it — no emailing five different venue-hire teams
-        to find out.
-      </p>
+<Layout title="Venue clearance — book a room">
+  <header class="masthead">
+    <p class="masthead__kicker">ANU club venue clearance</p>
+    <h1>Book a room, skip the inbox</h1>
+    <p class="masthead__lede">
+      Tell us the event and headcount. We match a room to the team that owns
+      it, so you're not guessing which of five inboxes to try first.
+    </p>
+  </header>
+
+  <div class="board-row">
+    <section class="panel panel--paper" aria-labelledby="request-heading">
+      <h2 id="request-heading">New request</h2>
       <form method="post" action="/api/bookings">
         <label for="event">Event name</label>
         <input id="event" name="event" required />
+
         <label for="headcount">Headcount</label>
         <input id="headcount" name="headcount" type="number" min="1" required />
-        <label for="building">Preferred building</label>
-        <input id="building" name="building" list="buildings" placeholder="Any building" />
-        <datalist id="buildings">
-          {buildings.map((building) => <option value={building} />)}
-        </datalist>
-        <button>Request a venue</button>
-      </form>
 
-      <ul id="bookings">
-        {bookings.map((booking) => {
-          const venue = venueById(booking.venueId);
-          return (
-            <li data-booking-id={booking.id} data-status={booking.status}>
-              <strong>{booking.event}</strong> — {booking.headcount} people
-              <p>Status: {booking.status}</p>
-              {venue ? (
-                <p>
-                  Assigned: {venue.name} ({venue.building}) — owned by{" "}
-                  {venue.owningTeam}, <a href={`mailto:${venue.contactEmail}`}>{venue.contactEmail}</a>
+        <label for="building">Preferred building</label>
+        <select id="building" name="building">
+          <option value="">Any building</option>
+          {buildings.map((building) => <option value={building}>{building}</option>)}
+        </select>
+
+        <button type="submit">Request a room</button>
+      </form>
+    </section>
+
+    <section class="panel panel--directory" aria-labelledby="directory-heading">
+      <h2 id="directory-heading">Who owns what</h2>
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">Building</th>
+            <th scope="col">Capacity</th>
+            <th scope="col">Managed by</th>
+          </tr>
+        </thead>
+        <tbody>
+          {venues.map((venue) => (
+            <tr>
+              <th scope="row">{venue.building}</th>
+              <td>up to {venue.capacity}</td>
+              <td>
+                {venue.owningTeam}
+                <br />
+                <a href={`mailto:${venue.contactEmail}`}>{venue.contactEmail}</a>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </section>
+  </div>
+
+  <section class="ledger" aria-labelledby="ledger-heading">
+    <h2 id="ledger-heading">Ledger</h2>
+    {
+      bookings.length === 0 ? (
+        <p class="ledger__empty">No requests yet — the first one you submit appears here.</p>
+      ) : (
+        <ul class="ledger__list">
+          {bookings.map((booking) => {
+            const venue = venueById(booking.venueId);
+            const nextAction = NEXT_ACTION[booking.status];
+            return (
+              <li
+                class="ledger-entry"
+                data-booking-id={booking.id}
+                data-status={booking.status}
+              >
+                <span class="ledger-entry__num">No. {String(booking.id).padStart(3, "0")}</span>
+                <span class="ledger-entry__title">
+                  {booking.event} <span class="ledger-entry__headcount">· {booking.headcount} people</span>
+                </span>
+                <span class={STAMP_CLASS[booking.status]}>{STATUS_LABEL[booking.status]}</span>
+                <p class="ledger-entry__detail">
+                  {venue ? (
+                    <>
+                      {venue.name}, {venue.building} — owned by {venue.owningTeam},{" "}
+                      <a href={`mailto:${venue.contactEmail}`}>{venue.contactEmail}</a>
+                    </>
+                  ) : (
+                    <>
+                      No room in the directory holds {booking.headcount} people
+                      {booking.preferredBuilding ? ` in ${booking.preferredBuilding}` : ""}. Try a
+                      smaller headcount, or widen your building preference.
+                    </>
+                  )}
                 </p>
-              ) : (
-                <p>
-                  No venue fits this headcount
-                  {booking.preferredBuilding ? ` in ${booking.preferredBuilding}` : ""}.
-                </p>
-              )}
-              {ADVANCEABLE.has(booking.status) && (
-                <form method="post" action={`/api/bookings/${booking.id}/advance`}>
-                  <button>Advance to next step</button>
-                </form>
-              )}
-            </li>
-          );
-        })}
-      </ul>
-    </main>
-  </body>
-</html>
+                {nextAction && (
+                  <form
+                    class="ledger-entry__action"
+                    method="post"
+                    action={`/api/bookings/${booking.id}/advance`}
+                  >
+                    <button type="submit">{nextAction}</button>
+                  </form>
+                )}
+              </li>
+            );
+          })}
+        </ul>
+      )
+    }
+  </section>
+</Layout>
