@@ -1,0 +1,116 @@
+---
+import Layout from "../layouts/Layout.astro";
+import VenueContact from "../components/VenueContact.astro";
+import { listBookings, venueById } from "../lib/db";
+
+const bookings = listBookings();
+
+const STATUS_LABEL: Record<string, string> = {
+  tentatively_assigned: "Room held (tentative)",
+  foc_pending: "Awaiting FOC approval",
+  foc_approved: "FOC approved",
+  confirmed: "Confirmed",
+  no_venue_available: "No room available",
+};
+
+const NEXT_ACTION: Record<string, string> = {
+  tentatively_assigned: "Submit FOC form",
+  foc_pending: "Mark FOC approved",
+  foc_approved: "Confirm booking",
+};
+
+// Real deadlines from ANU's Functions on Campus page: 21 days' notice if the
+// event has liquor, 14 days otherwise. The FOC step is the one stage in the
+// real process that has a hard, published lead time, so it's the one place
+// worth naming it rather than leaving the workflow's timing a mystery.
+const NEXT_ACTION_HINT: Record<string, string> = {
+  tentatively_assigned:
+    "Functions on Campus needs 14 days' notice — 21 if the event has liquor.",
+};
+
+const STAMP_CLASS: Record<string, string> = {
+  tentatively_assigned: "stamp stamp--amber",
+  foc_pending: "stamp stamp--plum",
+  foc_approved: "stamp stamp--blue",
+  confirmed: "stamp stamp--confirmed",
+  no_venue_available: "stamp stamp--flagged",
+};
+---
+
+<Layout title="Your requests — book a room">
+  <header class="masthead">
+    <h1>Your requests</h1>
+    <p class="masthead__lede">
+      Every request submitted so far, and where it sits in the approval
+      chain — tentatively assigned, awaiting Functions on Campus, or
+      confirmed.
+    </p>
+  </header>
+
+  <section class="ledger" aria-label="Requests">
+    {
+      bookings.length === 0 ? (
+        <p class="ledger__empty">
+          No requests yet — <a href="/request">submit one</a> and it appears
+          here.
+        </p>
+      ) : (
+        <ul class="ledger__list">
+          {bookings.map((booking) => {
+            const venue = venueById(booking.venueId);
+            const nextAction = NEXT_ACTION[booking.status];
+            return (
+              <li
+                class="ledger-entry"
+                data-booking-id={booking.id}
+                data-status={booking.status}
+              >
+                <span class="ledger-entry__num">No. {String(booking.id).padStart(3, "0")}</span>
+                <span class="ledger-entry__title">
+                  {booking.event}{" "}
+                  <span class="ledger-entry__headcount">for {booking.headcount} people</span>
+                </span>
+                <span class={STAMP_CLASS[booking.status]}>{STATUS_LABEL[booking.status]}</span>
+                {booking.contactName && (
+                  <p class="ledger-entry__meta">
+                    Requested by {booking.contactName}
+                    {booking.organisation ? `, ${booking.organisation}` : ""}
+                    {booking.eventDate ? ` — ${booking.eventDate}` : ""}
+                    {booking.startTime ? ` from ${booking.startTime}` : ""}
+                    {booking.conclusionTime ? ` to ${booking.conclusionTime}` : ""}
+                  </p>
+                )}
+                <p class="ledger-entry__detail">
+                  {venue ? (
+                    <>
+                      {venue.name}, {venue.building} — owned by {venue.owningTeam},{" "}
+                      <VenueContact method={venue.contactMethod} contact={venue.contact} />
+                    </>
+                  ) : (
+                    <>
+                      No room in the directory holds {booking.headcount} people
+                      {booking.preferredBuilding ? ` in ${booking.preferredBuilding}` : ""}. Try a
+                      smaller headcount, or widen your building preference.
+                    </>
+                  )}
+                </p>
+                {nextAction && (
+                  <form
+                    class="ledger-entry__action"
+                    method="post"
+                    action={`/api/bookings/${booking.id}/advance`}
+                  >
+                    <button type="submit">{nextAction}</button>
+                    {NEXT_ACTION_HINT[booking.status] && (
+                      <span class="ledger-entry__hint">{NEXT_ACTION_HINT[booking.status]}</span>
+                    )}
+                  </form>
+                )}
+              </li>
+            );
+          })}
+        </ul>
+      )
+    }
+  </section>
+</Layout>

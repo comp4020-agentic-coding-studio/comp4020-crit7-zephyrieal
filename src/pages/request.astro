@@ -1,0 +1,128 @@
+---
+import Layout from "../layouts/Layout.astro";
+import VenueContact from "../components/VenueContact.astro";
+import { listVenues } from "../lib/db";
+
+const venues = listVenues();
+const buildings = [...new Set(venues.map((venue) => venue.building))];
+---
+
+<Layout title="New request — book a room">
+  <header class="masthead">
+    <h1>New request</h1>
+    <p class="masthead__lede">
+      Tell us the event and headcount. We match a room to the team that owns
+      it, so you're not guessing which of five inboxes to try first.
+    </p>
+  </header>
+
+  <section class="panel panel--paper" aria-label="Request details">
+    <form method="post" action="/api/bookings">
+      <fieldset>
+        <legend>Contact information</legend>
+
+        <label for="contactName">Name</label>
+        <input id="contactName" name="contactName" required />
+
+        <label for="organisation">Organisation</label>
+        <input id="organisation" name="organisation" />
+
+        <label for="phone">Phone</label>
+        <input id="phone" name="phone" type="tel" />
+
+        <label for="contactEmail">Email</label>
+        <input id="contactEmail" name="contactEmail" type="email" required />
+
+        <label for="address">Address</label>
+        <input id="address" name="address" />
+      </fieldset>
+
+      <fieldset>
+        <legend>Event information</legend>
+
+        <label for="event">Event name</label>
+        <input id="event" name="event" required />
+
+        <label for="eventDate">Event date</label>
+        <input id="eventDate" name="eventDate" type="date" required />
+
+        <div class="field-row">
+          <div>
+            <label for="setupTime">Set up time</label>
+            <input id="setupTime" name="setupTime" type="time" />
+          </div>
+          <div>
+            <label for="startTime">Start time</label>
+            <input id="startTime" name="startTime" type="time" />
+          </div>
+          <div>
+            <label for="conclusionTime">Conclusion time</label>
+            <input id="conclusionTime" name="conclusionTime" type="time" />
+          </div>
+          <div>
+            <label for="packDownTime">Pack down time</label>
+            <input id="packDownTime" name="packDownTime" type="time" />
+          </div>
+        </div>
+
+        <label for="headcount">Expected number of attendees</label>
+        <input id="headcount" name="headcount" type="number" min="1" required />
+
+        <label for="vipAttendance">VIP attendance (if applicable)</label>
+        <input id="vipAttendance" name="vipAttendance" />
+
+        <label for="building">Preferred venue</label>
+        <select id="building" name="building">
+          <option value="">Any building</option>
+          {buildings.map((building) => <option value={building}>{building}</option>)}
+        </select>
+
+        <label for="description">Brief function description</label>
+        <textarea id="description" name="description" rows="2"></textarea>
+
+        <label for="foodBeverage">Food and beverage requirements</label>
+        <textarea id="foodBeverage" name="foodBeverage" rows="2"></textarea>
+
+        <label for="venueSetup">Venue setup requirements</label>
+        <textarea id="venueSetup" name="venueSetup" rows="2"></textarea>
+
+        <label for="avRequirements">Audiovisual requirements</label>
+        <textarea id="avRequirements" name="avRequirements" rows="2"></textarea>
+      </fieldset>
+
+      <button type="submit">Request a room</button>
+    </form>
+    <p class="panel__hint">
+      ANU Venue Hire quotes up to 5 business days to reply by email —
+      commercial venues with their own booking site are usually faster.
+      Every event on campus needs Functions on Campus approval: submit at
+      least 14 days ahead, or 21 if there'll be liquor.
+    </p>
+  </section>
+
+  <section class="panel panel--directory" aria-labelledby="directory-heading">
+    <h2 id="directory-heading">Who owns what</h2>
+    <table>
+      <thead>
+        <tr>
+          <th scope="col">Building</th>
+          <th scope="col">Capacity</th>
+          <th scope="col">Managed by</th>
+        </tr>
+      </thead>
+      <tbody>
+        {venues.map((venue) => (
+          <tr>
+            <th scope="row">{venue.building}</th>
+            <td>up to {venue.capacity}</td>
+            <td>
+              {venue.owningTeam}
+              <br />
+              <VenueContact method={venue.contactMethod} contact={venue.contact} />
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </section>
+</Layout>

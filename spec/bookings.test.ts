@@ -24,11 +24,11 @@ import { beforeAll, describe, expect, inject, it } from "vitest";
 //     description, foodBeverage, venueSetup, avRequirements — all optional
 //     and stored as given) creates a request, assigns the smallest venue
 //     whose capacity fits (matching `building` when given), and redirects to /
-//   - GET / renders one element per booking with data-booking-id and
+//   - GET /requests renders one element per booking with data-booking-id and
 //     data-status, containing the event name, headcount, and — when
 //     assigned — the venue name, owning team and contact
 //   - POST /api/bookings/:id/advance moves that booking to its next
-//     workflow status and redirects to /
+//     workflow status and redirects to /requests
 const baseUrl = inject("baseUrl");
 
 type Venue = {
@@ -49,7 +49,7 @@ const post = (path: string, body: URLSearchParams) =>
     redirect: "manual",
   });
 
-async function getDoc(path = "/"): Promise<Document> {
+async function getDoc(path = "/requests"): Promise<Document> {
   const res = await fetch(new URL(path, baseUrl));
   const dom = new JSDOM(await res.text(), { url: new URL(path, baseUrl).href });
   return dom.window.document;
