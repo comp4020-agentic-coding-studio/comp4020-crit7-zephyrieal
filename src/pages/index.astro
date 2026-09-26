@@ -31,7 +31,6 @@ const STAMP_CLASS: Record<string, string> = {
 
 <Layout title="Venue clearance — book a room">
   <header class="masthead">
-    <p class="masthead__kicker">ANU club venue clearance</p>
     <h1>Book a room, skip the inbox</h1>
     <p class="masthead__lede">
       Tell us the event and headcount. We match a room to the team that owns
@@ -104,7 +103,8 @@ const STAMP_CLASS: Record<string, string> = {
               >
                 <span class="ledger-entry__num">No. {String(booking.id).padStart(3, "0")}</span>
                 <span class="ledger-entry__title">
-                  {booking.event} <span class="ledger-entry__headcount">· {booking.headcount} people</span>
+                  {booking.event}{" "}
+                  <span class="ledger-entry__headcount">for {booking.headcount} people</span>
                 </span>
                 <span class={STAMP_CLASS[booking.status]}>{STATUS_LABEL[booking.status]}</span>
                 <p class="ledger-entry__detail">
