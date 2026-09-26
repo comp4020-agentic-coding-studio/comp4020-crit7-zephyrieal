@@ -33,7 +33,12 @@ migrate(db, { migrationsFolder: "./drizzle" });
 // Seed reflects ANU's own published venue categories — three of them, per
 // services.anu.edu.au/campus-environment/venues-functions/anu-venue-hire and
 // .../functions-on-campus/find-a-venue — each with a genuinely different
-// contact shape, not just a different address:
+// contact shape, not just a different address. The venue-hire page also
+// names its three central-teaching-space types outright (flat rooms, tiered
+// theatres, computer labs), so all three are seeded rather than just two,
+// and its own quoted numbers — a 5-business-day reply time, and FOC's
+// 14/21-day notice windows — show up as hints in the UI instead of being
+// left implicit:
 // - Central Teaching Spaces: a shared team, ANU Venue Hire, one inbox
 //   (venuehire@anu.edu.au).
 // - Commercial venues (Kambri, University House, School of Music, ...):
@@ -63,6 +68,16 @@ const SEED_VENUES: (typeof venues.$inferInsert)[] = [
     name: "Central Teaching Space — Tiered Lecture Theatre",
     building: "Central Teaching Spaces",
     capacity: 200,
+    owningTeam: "ANU Venue Hire",
+    contactMethod: "email",
+    contact: "venuehire@anu.edu.au",
+  },
+  {
+    // "Computer labs (PC or MAC)" is one of the three venue types the page
+    // names outright alongside flat rooms and tiered theatres.
+    name: "Central Teaching Space — Computer Lab",
+    building: "Central Teaching Spaces",
+    capacity: 24,
     owningTeam: "ANU Venue Hire",
     contactMethod: "email",
     contact: "venuehire@anu.edu.au",

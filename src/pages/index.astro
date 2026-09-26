@@ -21,6 +21,15 @@ const NEXT_ACTION: Record<string, string> = {
   foc_approved: "Confirm booking",
 };
 
+// Real deadlines from ANU's Functions on Campus page: 21 days' notice if the
+// event has liquor, 14 days otherwise. The FOC step is the one stage in the
+// real process that has a hard, published lead time, so it's the one place
+// worth naming it rather than leaving the workflow's timing a mystery.
+const NEXT_ACTION_HINT: Record<string, string> = {
+  tentatively_assigned:
+    "Functions on Campus needs 14 days' notice — 21 if the event has liquor.",
+};
+
 const STAMP_CLASS: Record<string, string> = {
   tentatively_assigned: "stamp stamp--amber",
   foc_pending: "stamp stamp--plum",
@@ -57,6 +66,10 @@ const STAMP_CLASS: Record<string, string> = {
 
         <button type="submit">Request a room</button>
       </form>
+      <p class="panel__hint">
+        ANU Venue Hire quotes up to 5 business days to reply by email —
+        commercial venues with their own booking site are usually faster.
+      </p>
     </section>
 
     <section class="panel panel--directory" aria-labelledby="directory-heading">
@@ -129,6 +142,9 @@ const STAMP_CLASS: Record<string, string> = {
                     action={`/api/bookings/${booking.id}/advance`}
                   >
                     <button type="submit">{nextAction}</button>
+                    {NEXT_ACTION_HINT[booking.status] && (
+                      <span class="ledger-entry__hint">{NEXT_ACTION_HINT[booking.status]}</span>
+                    )}
                   </form>
                 )}
               </li>

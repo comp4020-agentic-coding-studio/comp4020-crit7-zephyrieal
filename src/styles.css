@@ -164,6 +164,12 @@ h3 {
   background: #000;
 }
 
+.panel__hint {
+  margin: 0.9rem 0 0;
+  font-size: 0.82rem;
+  color: #6b5f47;
+}
+
 .panel--directory {
   border: 1px solid var(--board-line);
 }
@@ -281,6 +287,13 @@ h3 {
 
 .ledger-entry__action button:hover {
   background: var(--brass-dark);
+}
+
+.ledger-entry__hint {
+  display: block;
+  margin-block-start: 0.4rem;
+  font-size: 0.82rem;
+  color: var(--ivory-dim);
 }
 
 .stamp {
