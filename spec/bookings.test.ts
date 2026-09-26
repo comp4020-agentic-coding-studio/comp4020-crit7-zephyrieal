@@ -17,9 +17,13 @@ import { beforeAll, describe, expect, inject, it } from "vitest";
 //     on contactMethod ("email" | "website" | "department"); not every real
 //     ANU venue has a shared team inbox, so the UI must render whichever one
 //     a venue has without assuming it's always a mailto link.
-//   - POST /api/bookings (form: event, headcount, building?) creates a
-//     request, assigns the smallest venue whose capacity fits (matching
-//     `building` when given), and redirects to /
+//   - POST /api/bookings (form: event, headcount, building?, plus the
+//     contact/event-detail fields ANU's own Venue Hire Request Form asks for
+//     — contactName, organisation, phone, contactEmail, address, eventDate,
+//     setupTime, startTime, conclusionTime, packDownTime, vipAttendance,
+//     description, foodBeverage, venueSetup, avRequirements — all optional
+//     and stored as given) creates a request, assigns the smallest venue
+//     whose capacity fits (matching `building` when given), and redirects to /
 //   - GET / renders one element per booking with data-booking-id and
 //     data-status, containing the event name, headcount, and — when
 //     assigned — the venue name, owning team and contact

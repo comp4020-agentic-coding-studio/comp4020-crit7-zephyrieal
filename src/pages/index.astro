@@ -48,56 +48,116 @@ const STAMP_CLASS: Record<string, string> = {
     </p>
   </header>
 
-  <div class="board-row">
-    <section class="panel panel--paper" aria-labelledby="request-heading">
-      <h2 id="request-heading">New request</h2>
-      <form method="post" action="/api/bookings">
+  <section class="panel panel--paper" aria-labelledby="request-heading">
+    <h2 id="request-heading">New request</h2>
+    <form method="post" action="/api/bookings">
+      <fieldset>
+        <legend>Contact information</legend>
+
+        <label for="contactName">Name</label>
+        <input id="contactName" name="contactName" required />
+
+        <label for="organisation">Organisation</label>
+        <input id="organisation" name="organisation" />
+
+        <label for="phone">Phone</label>
+        <input id="phone" name="phone" type="tel" />
+
+        <label for="contactEmail">Email</label>
+        <input id="contactEmail" name="contactEmail" type="email" required />
+
+        <label for="address">Address</label>
+        <input id="address" name="address" />
+      </fieldset>
+
+      <fieldset>
+        <legend>Event information</legend>
+
         <label for="event">Event name</label>
         <input id="event" name="event" required />
 
-        <label for="headcount">Headcount</label>
+        <label for="eventDate">Event date</label>
+        <input id="eventDate" name="eventDate" type="date" required />
+
+        <div class="field-row">
+          <div>
+            <label for="setupTime">Set up time</label>
+            <input id="setupTime" name="setupTime" type="time" />
+          </div>
+          <div>
+            <label for="startTime">Start time</label>
+            <input id="startTime" name="startTime" type="time" />
+          </div>
+          <div>
+            <label for="conclusionTime">Conclusion time</label>
+            <input id="conclusionTime" name="conclusionTime" type="time" />
+          </div>
+          <div>
+            <label for="packDownTime">Pack down time</label>
+            <input id="packDownTime" name="packDownTime" type="time" />
+          </div>
+        </div>
+
+        <label for="headcount">Expected number of attendees</label>
         <input id="headcount" name="headcount" type="number" min="1" required />
 
-        <label for="building">Preferred building</label>
+        <label for="vipAttendance">VIP attendance (if applicable)</label>
+        <input id="vipAttendance" name="vipAttendance" />
+
+        <label for="building">Preferred venue</label>
         <select id="building" name="building">
           <option value="">Any building</option>
           {buildings.map((building) => <option value={building}>{building}</option>)}
         </select>
 
-        <button type="submit">Request a room</button>
-      </form>
-      <p class="panel__hint">
-        ANU Venue Hire quotes up to 5 business days to reply by email —
-        commercial venues with their own booking site are usually faster.
-      </p>
-    </section>
+        <label for="description">Brief function description</label>
+        <textarea id="description" name="description" rows="2"></textarea>
 
-    <section class="panel panel--directory" aria-labelledby="directory-heading">
-      <h2 id="directory-heading">Who owns what</h2>
-      <table>
-        <thead>
+        <label for="foodBeverage">Food and beverage requirements</label>
+        <textarea id="foodBeverage" name="foodBeverage" rows="2"></textarea>
+
+        <label for="venueSetup">Venue setup requirements</label>
+        <textarea id="venueSetup" name="venueSetup" rows="2"></textarea>
+
+        <label for="avRequirements">Audiovisual requirements</label>
+        <textarea id="avRequirements" name="avRequirements" rows="2"></textarea>
+      </fieldset>
+
+      <button type="submit">Request a room</button>
+    </form>
+    <p class="panel__hint">
+      ANU Venue Hire quotes up to 5 business days to reply by email —
+      commercial venues with their own booking site are usually faster.
+      Every event on campus needs Functions on Campus approval: submit at
+      least 14 days ahead, or 21 if there'll be liquor.
+    </p>
+  </section>
+
+  <section class="panel panel--directory" aria-labelledby="directory-heading">
+    <h2 id="directory-heading">Who owns what</h2>
+    <table>
+      <thead>
+        <tr>
+          <th scope="col">Building</th>
+          <th scope="col">Capacity</th>
+          <th scope="col">Managed by</th>
+        </tr>
+      </thead>
+      <tbody>
+        {venues.map((venue) => (
           <tr>
-            <th scope="col">Building</th>
-            <th scope="col">Capacity</th>
-            <th scope="col">Managed by</th>
+            <th scope="row">{venue.building}</th>
+            <td>up to {venue.capacity}</td>
+            <td>
+              {venue.owningTeam}
+              <br />
+              <VenueContact method={venue.contactMethod} contact={venue.contact} />
+            </td>
           </tr>
-        </thead>
-        <tbody>
-          {venues.map((venue) => (
-            <tr>
-              <th scope="row">{venue.building}</th>
-              <td>up to {venue.capacity}</td>
-              <td>
-                {venue.owningTeam}
-                <br />
-                <VenueContact method={venue.contactMethod} contact={venue.contact} />
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </section>
-  </div>
+        ))}
+      </tbody>
+    </table>
+  </section>
 
   <section class="ledger" aria-labelledby="ledger-heading">
     <h2 id="ledger-heading">Ledger</h2>
@@ -121,6 +181,15 @@ const STAMP_CLASS: Record<string, string> = {
                   <span class="ledger-entry__headcount">for {booking.headcount} people</span>
                 </span>
                 <span class={STAMP_CLASS[booking.status]}>{STATUS_LABEL[booking.status]}</span>
+                {booking.contactName && (
+                  <p class="ledger-entry__meta">
+                    Requested by {booking.contactName}
+                    {booking.organisation ? `, ${booking.organisation}` : ""}
+                    {booking.eventDate ? ` — ${booking.eventDate}` : ""}
+                    {booking.startTime ? ` from ${booking.startTime}` : ""}
+                    {booking.conclusionTime ? ` to ${booking.conclusionTime}` : ""}
+                  </p>
+                )}
                 <p class="ledger-entry__detail">
                   {venue ? (
                     <>

@@ -38,6 +38,10 @@ export const BOOKING_STATUSES = [
 ] as const;
 export type BookingStatus = (typeof BOOKING_STATUSES)[number] | "no_venue_available";
 
+// Columns beyond event/headcount mirror ANU's own Venue Hire Request Form
+// field-for-field (its "Contact Information" and "Event Information"
+// sections) — the actual information the real Venue Hire team says it needs
+// before it can act on a request, not a guess at what a form might ask.
 export const bookingRequests = sqliteTable("booking_requests", {
   id: int().primaryKey({ autoIncrement: true }),
   event: text().notNull(),
@@ -48,6 +52,23 @@ export const bookingRequests = sqliteTable("booking_requests", {
   createdAt: text("created_at")
     .notNull()
     .default(sql`(datetime('now'))`),
+
+  contactName: text("contact_name").notNull().default(""),
+  organisation: text().notNull().default(""),
+  phone: text().notNull().default(""),
+  contactEmail: text("contact_email").notNull().default(""),
+  address: text().notNull().default(""),
+
+  eventDate: text("event_date").notNull().default(""),
+  setupTime: text("setup_time").notNull().default(""),
+  startTime: text("start_time").notNull().default(""),
+  conclusionTime: text("conclusion_time").notNull().default(""),
+  packDownTime: text("pack_down_time").notNull().default(""),
+  vipAttendance: text("vip_attendance").notNull().default(""),
+  description: text().notNull().default(""),
+  foodBeverage: text("food_beverage").notNull().default(""),
+  venueSetup: text("venue_setup").notNull().default(""),
+  avRequirements: text("av_requirements").notNull().default(""),
 });
 
 export type BookingRequest = typeof bookingRequests.$inferSelect;

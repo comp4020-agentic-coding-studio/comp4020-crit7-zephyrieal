@@ -93,24 +93,12 @@ h3 {
   font-size: 1.05rem;
 }
 
-/* ---- board row: request form + directory ---- */
-
-.board-row {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
-  gap: 1.5rem;
-  align-items: start;
-}
-
-@media (max-width: 45rem) {
-  .board-row {
-    grid-template-columns: 1fr;
-  }
-}
+/* ---- panels: request form + directory ---- */
 
 .panel {
   border-radius: 0.25rem;
   padding: 1.75rem;
+  margin-block-end: 1.75rem;
 }
 
 .panel h2 {
@@ -124,6 +112,27 @@ h3 {
   box-shadow: 0 1px 0 var(--paper-line) inset;
 }
 
+.panel--paper fieldset {
+  border: none;
+  padding: 0;
+  margin: 0 0 1.5rem;
+}
+
+.panel--paper fieldset:last-of-type {
+  margin-block-end: 0;
+}
+
+.panel--paper legend {
+  padding: 0;
+  font-family: "Fraunces", Georgia, serif;
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin-block-end: 0.4rem;
+  border-bottom: 1px solid var(--paper-line);
+  width: 100%;
+  padding-block-end: 0.5rem;
+}
+
 .panel--paper label {
   display: block;
   font-size: 0.85rem;
@@ -131,12 +140,13 @@ h3 {
   margin-block: 1rem 0.3rem;
 }
 
-.panel--paper label:first-of-type {
-  margin-block-start: 0;
+.panel--paper fieldset:first-of-type > label:first-of-type {
+  margin-block-start: 1rem;
 }
 
 .panel--paper input,
-.panel--paper select {
+.panel--paper select,
+.panel--paper textarea {
   width: 100%;
   padding: 0.55rem 0.7rem;
   font: inherit;
@@ -145,6 +155,22 @@ h3 {
   border-radius: 0.2rem;
   background: #fff;
   color: var(--ink);
+}
+
+.panel--paper textarea {
+  resize: vertical;
+}
+
+.field-row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+@media (max-width: 40rem) {
+  .field-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 .panel--paper button {
@@ -261,6 +287,13 @@ h3 {
   color: var(--ivory-dim);
 }
 
+.ledger-entry__meta {
+  grid-column: 2 / 3;
+  margin: 0.3rem 0 0;
+  color: var(--ivory-dim);
+  font-size: 0.85rem;
+}
+
 .ledger-entry__detail {
   grid-column: 2 / 3;
   margin: 0.4rem 0 0;
@@ -359,6 +392,7 @@ h3 {
     justify-self: start;
   }
 
+  .ledger-entry__meta,
   .ledger-entry__detail,
   .ledger-entry__action {
     grid-column: 1 / -1;

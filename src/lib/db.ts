@@ -165,6 +165,21 @@ export function createBooking(input: {
   event: string;
   headcount: number;
   preferredBuilding?: string;
+  contactName?: string;
+  organisation?: string;
+  phone?: string;
+  contactEmail?: string;
+  address?: string;
+  eventDate?: string;
+  setupTime?: string;
+  startTime?: string;
+  conclusionTime?: string;
+  packDownTime?: string;
+  vipAttendance?: string;
+  description?: string;
+  foodBeverage?: string;
+  venueSetup?: string;
+  avRequirements?: string;
 }): BookingRequest {
   // listVenues() is sorted by capacity ascending, so the first candidate
   // that fits is the tightest fit — no picking your own room, same as the
@@ -189,6 +204,21 @@ export function createBooking(input: {
       preferredBuilding: input.preferredBuilding ?? null,
       venueId: assigned?.id ?? null,
       status: assigned ? "tentatively_assigned" : "no_venue_available",
+      contactName: input.contactName ?? "",
+      organisation: input.organisation ?? "",
+      phone: input.phone ?? "",
+      contactEmail: input.contactEmail ?? "",
+      address: input.address ?? "",
+      eventDate: input.eventDate ?? "",
+      setupTime: input.setupTime ?? "",
+      startTime: input.startTime ?? "",
+      conclusionTime: input.conclusionTime ?? "",
+      packDownTime: input.packDownTime ?? "",
+      vipAttendance: input.vipAttendance ?? "",
+      description: input.description ?? "",
+      foodBeverage: input.foodBeverage ?? "",
+      venueSetup: input.venueSetup ?? "",
+      avRequirements: input.avRequirements ?? "",
     })
     .returning()
     .get();
