@@ -12,13 +12,17 @@ import { beforeAll, describe, expect, inject, it } from "vitest";
 // The contract this file holds the app to, so it stays buildable however the
 // UI is built:
 //   - GET /api/venues returns JSON: { id, name, building, capacity,
-//     owningTeam, contactEmail }[]
+//     owningTeam, contactMethod, contact }[] — contact is an email address,
+//     a booking-site URL, or plain-language contact instructions, depending
+//     on contactMethod ("email" | "website" | "department"); not every real
+//     ANU venue has a shared team inbox, so the UI must render whichever one
+//     a venue has without assuming it's always a mailto link.
 //   - POST /api/bookings (form: event, headcount, building?) creates a
 //     request, assigns the smallest venue whose capacity fits (matching
 //     `building` when given), and redirects to /
 //   - GET / renders one element per booking with data-booking-id and
 //     data-status, containing the event name, headcount, and — when
-//     assigned — the venue name, owning team and contact email
+//     assigned — the venue name, owning team and contact
 //   - POST /api/bookings/:id/advance moves that booking to its next
 //     workflow status and redirects to /
 const baseUrl = inject("baseUrl");
@@ -29,7 +33,8 @@ type Venue = {
   building: string;
   capacity: number;
   owningTeam: string;
-  contactEmail: string;
+  contactMethod: string;
+  contact: string;
 };
 
 const post = (path: string, body: URLSearchParams) =>
@@ -80,7 +85,11 @@ describe("bookings", () => {
     expect(row.getAttribute("data-status")).toBe("tentatively_assigned");
     expect(row.textContent).toContain(expected.name);
     expect(row.textContent).toContain(expected.owningTeam);
-    expect(row.textContent).toContain(expected.contactEmail);
+    if (expected.contactMethod === "website") {
+      expect(row.textContent).toContain("Book on their site");
+    } else {
+      expect(row.textContent).toContain(expected.contact);
+    }
   });
 
   it("persists the assignment across a reload", async () => {

@@ -30,59 +30,100 @@ export const db = drizzle(client);
 // commit the migration it writes to drizzle/.
 migrate(db, { migrationsFolder: "./drizzle" });
 
-// Seed reflects what's actually verifiable about ANU venue hire
-// (services.anu.edu.au/campus-environment/venues-functions/anu-venue-hire):
-// - "ANU Venue Hire" runs centrally bookable teaching spaces (flat rooms,
-//   tiered theatres, computer labs) and is reachable at venuehire@anu.edu.au.
-// - Kambri Venues owns the Kambri precinct, including MRTC, and is reachable
-//   at kambri.venues@anu.edu.au (the page directs external clients there).
-// - The page's own answer for "who else do I contact" is a "Contacts for
-//   Other Venues" link — a personal OneDrive file that doesn't resolve. That
-//   dead link is *the problem this app exists to route around*, so the
-//   MSI/CECS-style entries below are a best-effort stand-in for teams no
-//   public page actually names; swap in real ones if you can get them.
+// Seed reflects ANU's own published venue categories — three of them, per
+// services.anu.edu.au/campus-environment/venues-functions/anu-venue-hire and
+// .../functions-on-campus/find-a-venue — each with a genuinely different
+// contact shape, not just a different address:
+// - Central Teaching Spaces: a shared team, ANU Venue Hire, one inbox
+//   (venuehire@anu.edu.au).
+// - Commercial venues (Kambri, University House, School of Music, ...):
+//   "book directly with the relevant venue" — no shared inbox, you go to
+//   that venue's own site. Kambri also gives a direct email
+//   (kambri.venues@anu.edu.au) for external teaching-room clients, so it's
+//   modeled as email; the others below are modeled as website since that's
+//   all ANU's own page gives.
+// - Department-managed spaces: "contact the relevant College, School or
+//   department" — literally no fixed contact ANU can name for you, which is
+//   exactly the gap this app exists to paper over.
+// The one real dead end: the general venue-hire page's own answer for "who
+// else do I contact" is a "Contacts for Other Venues" link to a personal
+// OneDrive file that doesn't resolve — so the Hanna Neumann/CSIT-style
+// entries below are best-effort stand-ins for teams no public ANU page
+// actually names; swap in real ones if you can get them.
 const SEED_VENUES: (typeof venues.$inferInsert)[] = [
   {
     name: "Central Teaching Space — Flat Room",
     building: "Central Teaching Spaces",
     capacity: 30,
     owningTeam: "ANU Venue Hire",
-    contactEmail: "venuehire@anu.edu.au",
+    contactMethod: "email",
+    contact: "venuehire@anu.edu.au",
   },
   {
     name: "Central Teaching Space — Tiered Lecture Theatre",
     building: "Central Teaching Spaces",
     capacity: 200,
     owningTeam: "ANU Venue Hire",
-    contactEmail: "venuehire@anu.edu.au",
+    contactMethod: "email",
+    contact: "venuehire@anu.edu.au",
   },
   {
     name: "Marie Reay Teaching Centre — Room 4.03",
     building: "Marie Reay Teaching Centre",
     capacity: 30,
     owningTeam: "Kambri Venues",
-    contactEmail: "kambri.venues@anu.edu.au",
+    contactMethod: "email",
+    contact: "kambri.venues@anu.edu.au",
   },
   {
     name: "Marie Reay Teaching Centre — Lecture Theatre",
     building: "Marie Reay Teaching Centre",
     capacity: 200,
     owningTeam: "Kambri Venues",
-    contactEmail: "kambri.venues@anu.edu.au",
+    contactMethod: "email",
+    contact: "kambri.venues@anu.edu.au",
+  },
+  {
+    // Illustrative capacity — ANU's page names this as a commercial venue
+    // but publishes no seating figures, only a booking site.
+    name: "University House — function rooms",
+    building: "University House",
+    capacity: 80,
+    owningTeam: "University House",
+    contactMethod: "website",
+    contact: "https://unihouse.anu.edu.au/events-meetings/",
+  },
+  {
+    name: "School of Music — performance venues",
+    building: "School of Music",
+    capacity: 50,
+    owningTeam: "School of Music",
+    contactMethod: "website",
+    contact: "https://music.cass.anu.edu.au/services/bookings/venues",
+  },
+  {
+    name: "Department-managed space",
+    building: "Department-managed space",
+    capacity: 20,
+    owningTeam: "Your College, School or department",
+    contactMethod: "department",
+    contact: "ANU doesn't name a shared contact for these — ask your department directly.",
   },
   {
     name: "Hanna Neumann Building — Tutorial Room",
     building: "Hanna Neumann Building",
     capacity: 40,
     owningTeam: "MSI Venues",
-    contactEmail: "msi.venues@anu.edu.au",
+    contactMethod: "email",
+    contact: "msi.venues@anu.edu.au",
   },
   {
     name: "CSIT Building — Seminar Room N101",
     building: "CSIT Building",
     capacity: 60,
     owningTeam: "CECS Venues",
-    contactEmail: "cecs.venues@anu.edu.au",
+    contactMethod: "email",
+    contact: "cecs.venues@anu.edu.au",
   },
 ];
 

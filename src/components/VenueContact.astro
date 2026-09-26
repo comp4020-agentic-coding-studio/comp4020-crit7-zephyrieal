@@ -1,0 +1,19 @@
+---
+interface Props {
+  method: string;
+  contact: string;
+}
+const { method, contact } = Astro.props;
+---
+
+{
+  method === "email" ? (
+    <a href={`mailto:${contact}`}>{contact}</a>
+  ) : method === "website" ? (
+    <a href={contact} target="_blank" rel="noopener noreferrer">
+      Book on their site
+    </a>
+  ) : (
+    <span class="venue-contact--none">{contact}</span>
+  )
+}
