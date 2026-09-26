@@ -256,6 +256,12 @@ h3 {
   color: #6b5f47;
 }
 
+/* --brass fails WCAG contrast against the paper background, so links inside
+   the paper panel get the same accessible dark gold the hint text uses. */
+.panel--paper a {
+  color: #6b5f47;
+}
+
 .panel--directory {
   border: 1px solid var(--board-line);
 }

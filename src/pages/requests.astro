@@ -102,7 +102,18 @@ const STAMP_CLASS: Record<string, string> = {
                   >
                     <button type="submit">{nextAction}</button>
                     {NEXT_ACTION_HINT[booking.status] && (
-                      <span class="ledger-entry__hint">{NEXT_ACTION_HINT[booking.status]}</span>
+                      <span class="ledger-entry__hint">
+                        {NEXT_ACTION_HINT[booking.status]}{" "}
+                        {booking.status === "tentatively_assigned" && (
+                          <a
+                            href="https://services.anu.edu.au/campus-environment/venues-functions/functions-on-campus"
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            Submit the FOC form
+                          </a>
+                        )}
+                      </span>
                     )}
                   </form>
                 )}
