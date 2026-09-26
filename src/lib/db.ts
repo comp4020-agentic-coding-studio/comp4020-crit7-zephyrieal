@@ -30,9 +30,32 @@ export const db = drizzle(client);
 // commit the migration it writes to drizzle/.
 migrate(db, { migrationsFolder: "./drizzle" });
 
-// TODO: illustrative seed — swap in the real buildings, owning teams and
-// contact emails for the ANU venue-hire process this models.
+// Seed reflects what's actually verifiable about ANU venue hire
+// (services.anu.edu.au/campus-environment/venues-functions/anu-venue-hire):
+// - "ANU Venue Hire" runs centrally bookable teaching spaces (flat rooms,
+//   tiered theatres, computer labs) and is reachable at venuehire@anu.edu.au.
+// - Kambri Venues owns the Kambri precinct, including MRTC, and is reachable
+//   at kambri.venues@anu.edu.au (the page directs external clients there).
+// - The page's own answer for "who else do I contact" is a "Contacts for
+//   Other Venues" link — a personal OneDrive file that doesn't resolve. That
+//   dead link is *the problem this app exists to route around*, so the
+//   MSI/CECS-style entries below are a best-effort stand-in for teams no
+//   public page actually names; swap in real ones if you can get them.
 const SEED_VENUES: (typeof venues.$inferInsert)[] = [
+  {
+    name: "Central Teaching Space — Flat Room",
+    building: "Central Teaching Spaces",
+    capacity: 30,
+    owningTeam: "ANU Venue Hire",
+    contactEmail: "venuehire@anu.edu.au",
+  },
+  {
+    name: "Central Teaching Space — Tiered Lecture Theatre",
+    building: "Central Teaching Spaces",
+    capacity: 200,
+    owningTeam: "ANU Venue Hire",
+    contactEmail: "venuehire@anu.edu.au",
+  },
   {
     name: "Marie Reay Teaching Centre — Room 4.03",
     building: "Marie Reay Teaching Centre",
